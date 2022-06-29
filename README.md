@@ -112,8 +112,8 @@ At the start of the application, the index page prompts the client to provide in
 Form submission will initiate the OAuth flow, alternatively granting access to the application for the client’s meeting data.
 
 The Resource APIs consumed by the application are:
+    
     - The List Meetings API is used to request all meetings available for the client. The HTTP response body is a JSON object. On success, a list of meetings conducted by the client is returned.
-
     - The Get Meeting Qualities API is used to request meeting quality data, provided a meeting_id is specified in the request parameters.
 
 The response is transformed to a JSON object with the following array structure to allow for readability:
@@ -233,7 +233,7 @@ The type of chart chosen for representation is a line chart. Line charts easily 
 
 Google offers a public API for charts which is free and straightforward to utilize. This API is used to generate charts for visualization of video, audio, and sharing qualities from a Webex meeting. 
 
-The following graphs show how data from one specific Webex meeting is represented in the webserver (application). Each of these graphs has jitter, latency, and packet loss data for video, audio, and sharing. The Webex meeting chosen for the graphical representation is a test scenario in which a network bottleneck has been introduced.
+
 
 ### Summary
 
