@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Visualization</title>
+
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        // the JSON data(analytics) is provided when the HTML is generated from this template.
+        var analytics = {{ .Data }};
+
+        //  .StartTime & .EndTime is also provided when the HTML is generated from this template.
+        const startTime = new Date('{{ .StartTime }}');
+        const endTime = new Date('{{ .EndTime }}');
+        var timeDiff = (endTime - startTime) / 1000;
+
+        // calls to the google charts API loads the chart presets we need.
+        google.charts.load('current', { 'packages': ['line'] });
+        google.charts.setOnLoadCallback(drawGraph);
+
+        function drawGraph() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Time Series Entry');
+            data.addColumn('number', 'Packet Loss (%)');
+            data.addColumn('number', 'Latency (ms)');
+            data.addColumn('number', 'Jitter (ms)');
+
+            let count = analytics.packet_loss.length;
+            for (let i = 0; i < count; i++) {
+                let timeSeriesEntry = "";
+                if (i == 0) {
+                    timeSeriesEntry = onlyTime(startTime);
+                } else if (i == count - 1) {
+                    timeSeriesEntry = onlyTime(endTime)
+                } else {
+                    let addend = Math.floor(((i + 1) / count) * timeDiff);
+                    timeSeriesEntry = timeStamp(addend, startTime);
+                }
+
+                data.addRow([timeSeriesEntry, analytics.packet_loss[i], analytics.latency[i], analytics.jitter[i]]);
+            }
+
+            var options = {
+                chart: {
+                    title: `Data from ${analytics.start_time} to ${analytics.end_time}`,
+                },
+                width: 1000,
+                height: 700
+            };
+
+            var graph = new google.charts.Line(document.getElementById('graph'));
+            graph.draw(data, google.charts.Line.convertOptions(options));
+        }
+
+        function onlyTime(date) {
+            let newDate = new Date(date);
+            return newDate.toISOString().split('T')[1].split('.')[0];
+        }
+
+        function timeStamp(addend, from) {
+            let newDate = new Date(from);
+            newDate.setSeconds(newDate.getSeconds() + addend);
+            return onlyTime(newDate);
+        }
+    </script>
+</head>
+
+<body>
+    <section>
+        <p>Try other data:</p>
+        <ul>
+            {{ if ne .DataPoint "audio_in" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=audio_in">Visualize 'Audio In'</a></li>
+            {{end}}
+
+            {{ if ne .DataPoint "audio_out" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=audio_out">Visualize 'Audio Out'</a></li>
+            {{end}}
+
+            {{ if ne .DataPoint "video_in" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=video_in">Visualize 'Video In'</a></li>
+            {{end}}
+
+            {{ if ne .DataPoint "video_out" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=video_out">Visualize 'Video Out'</a></li>
+            {{end}}
+
+            {{ if ne .DataPoint "share_in" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=share_in">Visualize 'Share In'</a></li>
+            {{end}}
+
+            {{ if ne .DataPoint "share_out" }}
+            <li><a href="/get_analytics_page?id={{ .MeetingID }}&dp=share_out">Visualize 'Share Out'</a></li>
+            {{end}}
+        </ul>
+    </section>
+    <h1 id="title"> Data for {{ dpTitleName .DataPoint }} from Meeting ID: {{ .MeetingID }}</h1>
+    <!--Div that will hold the graph-->
+    <div id="graph"></div>
+</body>
+
+</html>
