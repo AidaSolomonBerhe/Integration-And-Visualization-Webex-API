@@ -49,4 +49,6 @@ Our integration is focused on checking on the meeting analytics quality and is m
 
 ## Visualization
 
-Graphs and graphs
+Graphs and graphs 
+![alt text](https://drive.google.com/file/d/1b2VXYEj8aq0MZbsji3X1xzw-KqmslmI9/view?usp=sharing)
+
