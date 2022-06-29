@@ -182,6 +182,7 @@ The response is transformed to a JSON object with the following array structure 
 ### Elements of Visualization
 
 The analytics visualization for the data uses three data points:
+    
     - Audio In - The collection of downstream (sent to the client) audio quality data.
     - Audio Out - The collection of upstream (sent from the client) audio quality data.
  
