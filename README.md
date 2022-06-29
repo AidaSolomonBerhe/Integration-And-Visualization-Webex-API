@@ -1,30 +1,70 @@
-# Integration Visualization with Webex API
+# Integration and Visualization with Webex API
 
-## Basics
+This chapter is an optional and supplementary part of the thesis suggested by Telenor. 
 
-### REST APIS
+## Objectives
 
-REST stands for Representational State Trasfer. This is an architecture that employs an application program interface (API) using HTTP requests to send and receive data. In a RESTful service there resources behind it can be accessed and manipulated using GET, POST, PUT and DELETE HTTP methods. The transfer mime type used in most case is JSON but other [MIME TYPES]() can be used
+### General Objective
+
+Through integration with Webex's API, Webex meeting quality is visualized. Successful execution and description convey a solid understanding of data visualization through REST API.
+
+### Specific Objective
+    - Create a web server (Integration server) as a test environment for the Integration. 
+    - Register an Integration with Webex API 
+    - Create scripts that retrieve meeting room quality in JSON format and save it
+    - Visualize the meeting room experience in a creative manner
+
+## Technology and Tools
+
+This subchapter demonstrates the APIs (Application Program Interface), programming languages, and other technologies deployed to create the webserver (Integration server or application), integrate with Webex's API, and visualize Webex meeting quality.
+
+### Webex API
+Webex APIs facilitate access to the Webex Platform to develop Bots, Integrations, and Guest Issuer applications. Webex APIs enable direct access to the Cisco Webex Platform for one's application, allowing one to:
+    - Create a Webex area and invite individuals
+
+    - Search for members of one's organization
+
+    - Post communications in a Webex area
+
+    - Get Webex space history or receive real-time notifications when others publish new messages, and much more.
+
+### REST API
+
+REST stands for Representational State Transfer. REST API is an architecture that deploys an API using HTTP (Hypertext Transfer Protocol) requests to send and receive data. Resources entailed in a RESTful service can be accessed and manipulated using GET, POST, PUT, DELETE, and other HTTP methods. 
+
+The transfer MIME type (Multipurpose Internet Mail Extensions) used in most cases is JSON. However, other MIME types can be used in data encoding. MIME types specify the nature and format of a document, file, or collection of bytes (https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
+
+### Programming Languages
+The program code is written in Golang {https://go.dev/}, HTML (HyperText Markup Language), and JavaScript. The database used is SQLite {https://www.sqlite.org/index.html}. The front end is rendered as a static site.  Go is chosen because of the language's simple syntax, which makes explaining code snippets uncomplicated.
+
+The application is focused on fetching Meeting Analytics Quality data. This data is only accessible for one request every 5 minutes for each meeting data fetched. Therefore, having a cache in the application is a necessity. Thus, the application uses an SQLite database.
+
+SQLite in the application allows for fault tolerance. When the client makes multiple requests for Meeting Analytics Quality data, any subsequent request that hits the '429 Too Many Request' status code is redirected to the cache, for the result is cached. SQLite is chosen because of the language's simplicity and requires little to no setup to be employed.
+
+The application also uses cookies to store the client_secret, client_id, access_token, and refresh_token in the client’s browser. This data is necessary for the application to interact with the Webex API. Due to time-boundness and security measures, the data is not saved in the SQLite database. The client_secret, access_token, and refresh_token change over time.
+
+### Integrations
+
+Integrations are means by which one can request permission to invoke the Webex REST API on behalf of a different Webex user. In order to accomplish this safely, the API supports the OAuth 2 standard, which enables third-party integrations to obtain a temporary access token for authenticating API calls rather than requesting the user's password.
 
 ### OAuth
 
-## Intoduction
+OAuth is an open standard for authentication usually employed by REST APIs to obtain scoped and limited access to the authorizing client’s data without giving the client’s password to the application. \autoref{fig:Webex OAuth Flow} demonstrates procedures to access protected resources under the scopes “analytics:read_all” and “meeting:schedules_read” in the Webex API. Scopes determine the level of access required for the integration.
 
-The program code is written in Golang and HTML. The frontend is rendered as a static site.
+The program requires that the client creates an integration with Webex. During the integration creation, the scopes meeting:schedules_read and analytics:read_all will be added as request parameters in the Authorization Request call. Permissions that the scopes grant include:
 
-The application is focused on fetching `Meeting Analytics Quality` data, this data is only accessible for `1 request every 5 minutes`. Therefore, there is need to have persitance in our application. The program uses an SQlite database for this just to allow for the fault tolerance on the part of the client making multiple requests. SQlite was chosen because it is a simple, easy to use and requires little to no setup to have it working. The data from the metrics is not interpreted or manipulated in any way, only a `read` and `write` mechanism exists.
+    - meeting:schedules\_read allows fetching all meetings that have been conducted for the account.
+    - analytics:read\_all allows fetching all meeting room activity. This includes quality metrics.
 
-## Authorization
+On success, the client will be provided with the client_id and client_secret that will be used to initiate the OAuth Flow. If the scope of the application changes, the client_secret will also change, and the previous value is rendered invalid; In this event, the Webex Integration page for the account will have a new client_secret value.
 
-The program requires that the client creates an integration with Webex. During the integration creation the scopes needed will be: `meeting:schedules_read` and `analytics:read_all`.
-- `meeting:schedules_read` is needed to fetch all meetings that have been conducted for the account.
-- `analytics:read_all` is needed to fetch all meeting room activity, this includes quality metrics.
+The OAuth Flow is used to request access to client data/resources asked for through login for the client on the resource providers page (Webex Login Page). On successful login, the application server is triggered with a redirect. The redirect URI points to the application server, needs to be publicly accessible and able to accept the request from Webex. Using cloud services such as Amazon Web Services or Google Cloud to host the application code makes this possible. 
 
-On success the client will be provided with the `client_id` and `client_secret` that will be used to initiate the OAuth Flow. If the `scope` of the application changes, the client secret will also change and the previous `client_secret` is rendered invalid(important to note). In this event the Webex Integration page for your account will have a new `client_secret`.
+After successful login, the redirect request from the OAuth Flow comes with a code parameter that is used to fetch an access_token and refresh_token. To request this data, the client provides the code alongside the client_id and client_secret provided during the application integration creation. With this bit out of the way, the final response is a JSON object with the following fields:
 
-The OAuth Flow is used to request the permissions asked for through tradition login for the client. If successful it triggers the server with a redirect to the client's auth redirect URI. The redirect URI points to our server and it also needs to be publicly accessible and able to accept the request. This is possible by hosting our codebase at a Cloud provider like `Amazon Web Services`.
+    - The access_token is used to request any resources under the scope approved for in the Webex API. 
+    - The refresh_token is used to request a new access_token and refresh_token after the current access_token has expired.
 
-The redirect request from the OAuth Flow after succesful login comes with a `code` parameter that is used to fetch an `access token` with a `refresh token`. To request for this token the client also needs to provide the `code`; and also the `client_id` and `client_secret` that were provided during the integration creation. With this bit out of the way our final response is a JSON object with the following fields:
 ```json
 {
     "access_token": "...",
@@ -34,21 +74,169 @@ The redirect request from the OAuth Flow after succesful login comes with a `cod
 }
 ```
 
-The `access_token` is used to request for any resources under the scope it was approved for in the Webex API. The `refresh_token` is used to request a new `access_token` after it has expired.
+### Accounts and Authentication
 
-## APIs
+For a user to log into the webserver (application), the user is obliged to have a Cisco Webex account. Moreover, creating an Integration in Webex with the scopes "analytics:read_all" and "meeting:schedules_read" is mandatory. Doing so generates client_id and client_secret.
 
-Our integration is focused on checking on the meeting analytics quality and is minimal in the number of APIs it uses.
-1. First, we use [List Meetings API](https://developer.webex.com/docs/api/v1/meetings/list-meetings) to request for all meetings available to us. With this we can use their `meeting_id`s in the next API. the JSON response on success we get is:
-```json
+Another requirement is that the user needs to have a Cisco Webex account associated with a corporate/ enterprise network to access the Cisco Webex Control Hub. Without access to the Control Hub, getting analytics data and visualization of meeting room experience would be impossible. Telenor has granted access to the Control Hub via the tenant 'Telenor Hoyskolestudent 2022'.
+
+The web server created for this specific task has the address http://3.222.86.122. 
+
+## Implementation
+
+### Crucial Listings
+At the start of the application, the index page prompts the client to provide input with a form.
+
+``` html
+{
+    <body>
+   <h1>Start OAuth Flow</h1>
+   <form method="POST" action="/init">
+       <label for="client_id">Client ID</label><br />
+       <input type="text" name="client_id" id="client_id"></br>
+       <label for="client_secret">Client Secret</label></br>
+       <input type="text" name="client_secret" id="client_secret"></br>
+       <label for="scope"></label><br />
+       <section>
+           <h3>Scopes:</h3>
+           <ul>
+               <li>analytics:read_all</li>
+               <li>meeting:schedules_read</li>
+           </ul>
+       </section>
+       <input type="submit">
+   </form>
+</body>
+}
 ```
+Form submission will initiate the OAuth flow, alternatively granting access to the application for the client’s meeting data.
 
-2. Lastly, we use [Meeting Qualities](https://developer.webex.com/docs/api/v1/meeting-qualities/get-meeting-qualities) to request for meeting quality data provided a specific `meeting_id` is provided in the request parameters. The JSON response on success we get is:
+The Resource APIs consumed by the application are:
+    - The List Meetings API is used to request all meetings available for the client. The HTTP response body is a JSON object. On success, a list of meetings conducted by the client is returned.
+
+    - The Get Meeting Qualities API is used to request meeting quality data, provided a meeting_id is specified in the request parameters.
+
+The response is transformed to a JSON object with the following array structure to allow for readability:
+
 ```json
+{
+     {
+       "meeting_id": "some_id",
+       "data_point": "audio_in",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ 0, -1],
+       "latency": [ 79, 79],
+       "jitter": [ 0, -1]
+   },
+   {
+       "meeting_id": "some_id",
+       "data_point": "audio_out",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ 0, 0],
+       "latency": [ 79, 79],
+       "jitter": [ 11, 13]
+   },
+   {
+       "meeting_id": "some_id",
+       "data_point": "video_in",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ -1, -1],
+       "latency": [ -1, -1],
+       "jitter": [ -1, -1]
+   },
+   {
+       "meeting_id": "some_id",
+       "data_point": "video_out",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ -1, -1],
+       "latency": [ -1, -1],
+       "jitter": [ -1, -1]
+   },
+   {
+       "meeting_id": "some_id",
+       "data_point": "share_in",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ -1, -1],
+       "latency": [ -1, -1],
+       "jitter": [ -1, -1]
+   },
+   {
+       "meeting_id": "some_id",
+       "data_point": "share_out",
+       "start_time": "2022-05-02T17:54:19.852Z",
+       "end_time": "2022-05-02T17:55:19.833Z",
+       "packet_loss": [ -1, -1],
+       "latency": [ -1, -1],
+       "jitter": [ -1, -1]
+   }
+}
 ```
 
 ## Visualization
 
-Graphs and graphs 
-![alt text](https://drive.google.com/file/d/1b2VXYEj8aq0MZbsji3X1xzw-KqmslmI9/view?usp=sharing)
+### Elements of Visualization
+
+The analytics visualization for the data uses three data points:
+    - Audio In - The collection of downstream (sent to the client) audio quality data.
+    - Audio Out - The collection of upstream (sent from the client) audio quality data.
+ 
+    - Video In - The collection of downstream (sent to the client) video quality data.
+    - Video Out  - The collection of upstream (sent from the client) video quality data.
+  
+    - Share In -The collection of downstream (sent to the client) share quality data.
+    - Share Out - The collection of upstream (sent from the client) shares quality data.
+
+The parameters are analyzed and graphically presented for each of these data points. These parameters are:
+
+- Packet Loss
+- Latency and
+- Jitter.
+
+JavaScript is required for chart generation. The code snippet for the visualization uses Golang’s templating system for code injection before being sent to the client’s browser.
+
+```javascript
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+       // the JSON data(analytics) is provided when the HTML is generated from this template.
+       var analytics = {{ .Data }};
+ 
+	//  .StartTime & .EndTime is also provided when the HTML is generated from this template.
+       const startTime = new Date('{{ .StartTime }}');
+       const endTime = new Date('{{ .EndTime }}');
+       var timeDiff = (endTime - startTime) / 1000;
+ 
+// calls to the google charts API loads the chart presets we need.
+       google.charts.load('current', { 'packages': ['line'] });
+       google.charts.setOnLoadCallback(drawGraph);
+ 
+       function drawGraph() {
+		// ...
+      		// details are redacted for brevity.
+ }
+// ...
+      // details are redacted for brevity.
+</script>
+
+
+```
+
+### Graphical Representation
+
+The type of chart chosen for representation is a line chart. Line charts easily allow for comparing changes within a time interval for more than one data set, saving space. 
+
+Google offers a public API for charts which is free and straightforward to utilize. This API is used to generate charts for visualization of video, audio, and sharing qualities from a Webex meeting. 
+
+The following graphs show how data from one specific Webex meeting is represented in the webserver (application). Each of these graphs has jitter, latency, and packet loss data for video, audio, and sharing. The Webex meeting chosen for the graphical representation is a test scenario in which a network bottleneck has been introduced.
+
+### Summary
+
+Using Integrations with Webex's API, data for Webex meeting quality is visualized through REST API. The meeting room experience is represented creatively through line charts. The execution of the webserver has been successful. 
+
+
 
