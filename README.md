@@ -1,7 +1,7 @@
 # Integration and Visualization with Webex API
 
 This chapter is an optional and supplementary part of the thesis suggested by Telenor. 
-Explanatory figures for the README.md file can be found at the following link under the folder "Main Document" https://drive.google.com/drive/folders/1SEbliwp19uP-DIDlsrI5AyyWwibCCCXh?usp=sharing. This folder contains the whole thesis pdf file. The figures can be found alongside documentation in Chapter 7 within the pdf file. Furthermore, the pdf file has an appendix containing the source code.
+Explanatory figures for the "README.md" file can be found at the following link under the folder "Main Document" https://drive.google.com/drive/folders/1SEbliwp19uP-DIDlsrI5AyyWwibCCCXh?usp=sharing. This folder contains the whole thesis pdf file. The figures can be found alongside documentation in Chapter 7 within the pdf file. Furthermore, the pdf file has an appendix containing the source code for the application. However, all source code elements are not part of the appendix. Thus, referring to the source codes here on Github is mandatory.
 
 
 
@@ -38,7 +38,7 @@ REST stands for Representational State Transfer. REST API is an architecture tha
 The transfer MIME type (Multipurpose Internet Mail Extensions) used in most cases is JSON. However, other MIME types can be used in data encoding. MIME types specify the nature and format of a document, file, or collection of bytes (https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types).
 
 ### Programming Languages
-The program code is written in Golang {https://go.dev/}, HTML (HyperText Markup Language), and JavaScript. The database used is SQLite {https://www.sqlite.org/index.html}. The front end is rendered as a static site.  Go is chosen because of the language's simple syntax, which makes explaining code snippets uncomplicated.
+The program code is written in Golang (https://go.dev/), HTML (HyperText Markup Language), and JavaScript. The database used is SQLite (https://www.sqlite.org/index.html). The front end is rendered as a static site.  Go is chosen because of the language's simple syntax, which makes explaining code snippets uncomplicated.
 
 The application is focused on fetching Meeting Analytics Quality data. This data is only accessible for one request every 5 minutes for each meeting data fetched. Therefore, having a cache in the application is a necessity. Thus, the application uses an SQLite database.
 
@@ -56,8 +56,8 @@ OAuth is an open standard for authentication usually employed by REST APIs to ob
 
 The program requires that the client creates an integration with Webex. During the integration creation, the scopes meeting:schedules_read and analytics:read_all will be added as request parameters in the Authorization Request call. Permissions that the scopes grant include:
 
-    - meeting:schedules\_read allows fetching all meetings that have been conducted for the account.
-    - analytics:read\_all allows fetching all meeting room activity. This includes quality metrics.
+    - meeting:schedules_read allows fetching all meetings that have been conducted for the account.
+    - analytics:read_all allows fetching all meeting room activity. This includes quality metrics(parameters).
 
 On success, the client will be provided with the client_id and client_secret that will be used to initiate the OAuth Flow. If the scope of the application changes, the client_secret will also change, and the previous value is rendered invalid; In this event, the Webex Integration page for the account will have a new client_secret value.
 
