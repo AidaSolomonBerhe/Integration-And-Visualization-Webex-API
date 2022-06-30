@@ -1,6 +1,9 @@
 # Integration and Visualization with Webex API
 
 This chapter is an optional and supplementary part of the thesis suggested by Telenor. 
+Explanatory figures for the README.md file can be found at the following link under the folder "Main Document" https://drive.google.com/drive/folders/1SEbliwp19uP-DIDlsrI5AyyWwibCCCXh?usp=sharing. This folder contains the whole thesis pdf file. The figures can be found alongside documentation in Chapter 7 within the pdf file. Furthermore, the pdf file has an appendix containing the source code.
+
+
 
 ## Objectives
 
@@ -49,7 +52,7 @@ Integrations are means by which one can request permission to invoke the Webex R
 
 ### OAuth
 
-OAuth is an open standard for authentication usually employed by REST APIs to obtain scoped and limited access to the authorizing client’s data without giving the client’s password to the application. \autoref{fig:Webex OAuth Flow} demonstrates procedures to access protected resources under the scopes “analytics:read_all” and “meeting:schedules_read” in the Webex API. Scopes determine the level of access required for the integration.
+OAuth is an open standard for authentication usually employed by REST APIs to obtain scoped and limited access to the authorizing client’s data without giving the client’s password to the application. Webex OAuth flow demonstrates procedures to access protected resources under the scopes “analytics:read_all” and “meeting:schedules_read” in the Webex API. Scopes determine the level of access required for the integration.
 
 The program requires that the client creates an integration with Webex. During the integration creation, the scopes meeting:schedules_read and analytics:read_all will be added as request parameters in the Authorization Request call. Permissions that the scopes grant include:
 
